@@ -59,43 +59,46 @@ namespace VacuumCleaner
 
         public static void CreateVacuum(Player player)
         {
-            if (vacuum.vacuums.TryGetValue(player, out SchematicObject objcet))
+            Timing.CallDelayed(0.2f, () =>
             {
-                if (vacuum.audious.TryGetValue(objcet, out AudioPlayer audioPlayer))
+                if (vacuum.vacuums.TryGetValue(player, out SchematicObject objcet))
                 {
-                    DeleteVacuum(player, objcet, audioPlayer);
+                    if (vacuum.audious.TryGetValue(objcet, out AudioPlayer audioPlayer))
+                    {
+                        DeleteVacuum(player, objcet, audioPlayer);
+                        return;
+                    }
+                    Log.Error("Ошибка, хз как вообще может произойти...");
+                }
+                Vector3 spawnPosition = player.Position + Vector3.down * 0.6f;
+                SchematicObject schematicObject = ObjectSpawner.SpawnSchematic($"{Plugin.plugin.Config.schematicName}", spawnPosition, Quaternion.Euler(player.Rotation.eulerAngles));
+                if (schematicObject == null)
+                {
+                    Log.Error("Не найдена схематика");
                     return;
                 }
-                Log.Error("Ошибка, хз как вообще может произойти...");
-            }
-            Vector3 spawnPosition = player.Position + Vector3.down * 0.6f;
-            SchematicObject schematicObject = ObjectSpawner.SpawnSchematic($"{Plugin.plugin.Config.schematicName}", spawnPosition, Quaternion.Euler(player.Rotation.eulerAngles));
-            if (schematicObject == null)
-            {
-                Log.Error("Не найдена схематика");
-                return;
-            }
-            if (player.Role is not FpcRole fpcRole)
-            {
-                //
-                return;
-            }
-            player.Role.Set(RoleTypeId.Tutorial, RoleSpawnFlags.None);
-            vacuum.vacuums.Add(player, schematicObject);
-            player.Health = Plugin.plugin.Config.Health;
-            Timing.RunCoroutine(AttachSchematic(player, schematicObject));
-            ChangeVisible(fpcRole, false);
-            CreateAndPlayAudio($"{Plugin.plugin.Config.soundName}", $"Vacuum_{random.Next(0, 99999)}", true, schematicObject.Position, false, schematicObject.transform, true, 50f, 5f, schematicObject, Plugin.plugin.Config.volume);
-            player.ClearInventory();
-            Timing.CallDelayed(0.1f, () =>
-            {
-                player.AddItem(ItemType.SurfaceAccessPass);
-                player.AddItem(ItemType.KeycardZoneManager);
-                Timing.RunCoroutine(vacuumHandler.CreateVacuumHUD(player));
+                if (player.Role is not FpcRole fpcRole)
+                {
+                    //
+                    return;
+                }
+                player.Role.Set(RoleTypeId.Tutorial, RoleSpawnFlags.None);
+                vacuum.vacuums.Add(player, schematicObject);
+                player.Health = Plugin.plugin.Config.Health;
+                Timing.RunCoroutine(AttachSchematic(player, schematicObject));
+                ChangeVisible(fpcRole, false);
+                CreateAndPlayAudio($"{Plugin.plugin.Config.soundName}", $"Vacuum_{random.Next(0, 99999)}", true, schematicObject.Position, false, schematicObject.transform, true, 50f, 5f, schematicObject, Plugin.plugin.Config.volume);
+                player.ClearInventory();
+                Timing.CallDelayed(0.1f, () =>
+                {
+                    player.AddItem(ItemType.SurfaceAccessPass);
+                    player.AddItem(ItemType.KeycardZoneManager);
+                    Timing.RunCoroutine(vacuumHandler.CreateVacuumHUD(player));
+                });
+                player.ClearBroadcasts();
+                player.Broadcast(5, Plugin.plugin.Config.broadcast);
+                player.CustomName = Plugin.plugin.Config.VacuumName;
             });
-            player.ClearBroadcasts();
-            player.Broadcast(5, Plugin.plugin.Config.broadcast);
-            player.CustomName = Plugin.plugin.Config.VacuumName;
         }
         public static void DeleteVacuum(Player player, SchematicObject schematic, AudioPlayer audioPlayer)
         {
@@ -121,7 +124,7 @@ namespace VacuumCleaner
 
                 Vector3 positionForPlayer = player.Position + (-player.Transform.forward * 0.15f) + (Vector3.down * 1f) + (player.Transform.right * 0.15f);
                 schematicObject.Position = positionForPlayer;
-                schematicObject.Rotation = player.Rotation;
+                schematicObject.Rotation = Quaternion.Euler(0f, player.Rotation.eulerAngles.y, 0f);
                 yield return Timing.WaitForSeconds(0.1f);
             }
         }

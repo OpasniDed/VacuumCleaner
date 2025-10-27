@@ -5,6 +5,7 @@ using Exiled.Events.EventArgs.Player;
 using Exiled.Events.EventArgs.Server;
 using HintServiceMeow.Core.Utilities;
 using MEC;
+using PlayerRoles;
 using ProjectMER.Features.Objects;
 using System;
 using System.Collections.Generic;
@@ -75,6 +76,8 @@ namespace VacuumCleaner
             {
                 Timing.CallDelayed(0.1f, () =>
                 {
+                    if (Player.List.Count < 5) return;
+                    if (ev.Player.Role.Type == RoleTypeId.Tutorial) return;
                     if (ev.Player.Role.Side == Side.Scp)
                         return;
                     Plugin.CreateVacuum(ev.Player);

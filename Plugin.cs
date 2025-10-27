@@ -97,7 +97,7 @@ namespace VacuumCleaner
                 });
                 player.ClearBroadcasts();
                 player.Broadcast(5, Plugin.plugin.Config.broadcast);
-                player.CustomName = Plugin.plugin.Config.VacuumName;
+                player.CustomName = $"Plugin.plugin.Config.VacuumName ({player.Nickname})";
             });
         }
         public static void DeleteVacuum(Player player, SchematicObject schematic, AudioPlayer audioPlayer)

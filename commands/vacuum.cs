@@ -1,20 +1,8 @@
 ﻿using CommandSystem;
-using Exiled.API.Extensions;
 using Exiled.API.Features;
-using Exiled.API.Features.Lockers;
-using Exiled.API.Features.Roles;
-using MEC;
-using PlayerRoles;
-using ProjectMER.Features;
 using ProjectMER.Features.Objects;
 using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using UnityEngine;
-using static UnityEngine.GraphicsBuffer;
 
 namespace VacuumCleaner.Commands
 {

@@ -1,5 +1,4 @@
 ﻿using Exiled.API.Enums;
-using Exiled.API.Extensions;
 using Exiled.API.Features;
 using Exiled.Events.EventArgs.Player;
 using Exiled.Events.EventArgs.Server;
@@ -7,12 +6,7 @@ using HintServiceMeow.Core.Utilities;
 using MEC;
 using PlayerRoles;
 using ProjectMER.Features.Objects;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using UnityEngine.Rendering;
 using VacuumCleaner.Commands;
 using static VacuumCleaner.Plugin;
 
@@ -22,7 +16,7 @@ namespace VacuumCleaner
     {
         public void Register()
         {
-            Exiled.Events.Handlers.Player.ChangingRole += ChangingRole;
+            Exiled.Events.Handlers.Player.Spawned += Spawned;
             Exiled.Events.Handlers.Player.Escaping += PlayerEscaping;
             Exiled.Events.Handlers.Player.Died += PlayerDead;
             Exiled.Events.Handlers.Server.RoundEnded += RoundEnded;
@@ -31,15 +25,17 @@ namespace VacuumCleaner
 
         public void Unregister()
         {
-            Exiled.Events.Handlers.Player.ChangingRole -= ChangingRole;
+            Exiled.Events.Handlers.Player.Spawned -= Spawned;
             Exiled.Events.Handlers.Player.Escaping -= PlayerEscaping;
             Exiled.Events.Handlers.Player.Died -= PlayerDead;
             Exiled.Events.Handlers.Server.RoundEnded -= RoundEnded;
             Exiled.Events.Handlers.Player.PickingUpItem -= PickingUp;
         }
 
-        private static System.Random random = new();
-        public static readonly Dictionary<Player, List<ItemType>> playerVault = new();
+        public static readonly Dictionary<Player, List<ItemType>> PlayerVault = new();
+
+        private static Config _config => Plugin.Instance.Config;
+
 
 
 
@@ -50,17 +46,17 @@ namespace VacuumCleaner
 
             ev.IsAllowed = false;
 
-            if (!playerVault.TryGetValue(ev.Player, out List<ItemType> values))
+            if (!PlayerVault.TryGetValue(ev.Player, out List<ItemType> values))
             {
                 values = new List<ItemType>();
-                playerVault[ev.Player] = values;
+                PlayerVault[ev.Player] = values;
             }
             if (values.Count >= 10)
             {
                 ev.Player.ShowHint("У вас лимит в хранилище!\nПропиши команду .drop чтобы освободить хранилище", 5f);
                 return;
             }
-            if (Plugin.plugin.Config.notAllowedItems.Contains(ev.Pickup.Type))
+            if (_config.notAllowedItems.Contains(ev.Pickup.Type))
             {
                 ev.Player.ShowHint("Вы не можете подобрать этот предмет", 5f);
                 return;
@@ -69,19 +65,16 @@ namespace VacuumCleaner
             values.Add(ev.Pickup.Type);
         }
 
-        private void ChangingRole(ChangingRoleEventArgs ev)
+        private void Spawned(SpawnedEventArgs ev)
         {
             Cleanup(ev.Player);
-            if (random.Next(0, 100) < Plugin.plugin.Config.chance)
+            if (UnityEngine.Random.Range(0, 100) < _config.chance)
             {
-                Timing.CallDelayed(0.1f, () =>
-                {
-                    if (Player.List.Count < 5) return;
-                    if (ev.Player.Role.Type == RoleTypeId.Tutorial) return;
-                    if (ev.Player.Role.Side == Side.Scp)
-                        return;
-                    Plugin.CreateVacuum(ev.Player);
-                });
+                if (Player.List.Count < 5) return;
+                if (ev.Player.Role.Type == RoleTypeId.Tutorial) return;
+                if (ev.Player.Role.Side == Side.Scp)
+                    return;
+                Plugin.CreateVacuum(ev.Player);
             }
         }
         private void PlayerEscaping(EscapingEventArgs ev)
@@ -117,11 +110,11 @@ namespace VacuumCleaner
             {
                 AutoText = _ =>
                 {
-                    if (playerVault.TryGetValue(player, out var items))
+                    if (PlayerVault.TryGetValue(player, out var items))
                     {
-                        return $"<color=green><b>Хранилище: {items.Count}/{Plugin.plugin.Config.limitForItems}</b></color>";
+                        return $"<color=green><b>Хранилище: {items.Count}/{_config.limitForItems}</b></color>";
                     }
-                    return $"<color=green><b>Хранилище: 0/{Plugin.plugin.Config.limitForItems}</b></color>";
+                    return $"<color=green><b>Хранилище: 0/{_config.limitForItems}</b></color>";
                 },
                 Alignment = HintServiceMeow.Core.Enum.HintAlignment.Center,
                 YCoordinate = 30,

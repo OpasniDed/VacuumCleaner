@@ -1,6 +1,8 @@
 1. Download https://github.com/Killers0992/AudioPlayerApi/latest
 
-2. Put .dll in Plugins
+2. Put HintServiceMeow into Plugins
+
+2. Put .dll into Plugins
 
 3. Download audio and put to your folder (Exiled/Configs/Audio by default)
 

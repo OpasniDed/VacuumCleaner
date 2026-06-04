@@ -45,20 +45,24 @@ namespace VacuumCleaner.Commands
                 return false;
             }
 
-            if (VacuumHelper.DeleteVacuum(target))
+            if (VacuumHelper.VacuumCleaners.ContainsKey(target))
             {
+                VacuumHelper.DeleteVacuum(target);
                 response = string.Format(Plugin.Instance.Translation.Deleted, target.Nickname);
-                return true;
-            }
-            else if (VacuumHelper.CreateVacuum(target))
-            {
-                response = string.Format(Plugin.Instance.Translation.Created, target.Nickname);
                 return true;
             }
             else
             {
-                response = "Idk";
-                return false;
+                if (VacuumHelper.CreateVacuum(target))
+                {
+                    response = string.Format(Plugin.Instance.Translation.Created, target.Nickname);
+                    return true;
+                }
+                else
+                {
+                    response = "Maybe schematic or audio is null";
+                    return false;
+                }
             }
         }
     }

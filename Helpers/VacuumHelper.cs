@@ -19,7 +19,8 @@ namespace VacuumCleaner.Helpers
         public static readonly Dictionary<Player, SchematicWithAudio> VacuumCleaners = new();
         public static bool CreateVacuum(Player player)
         {
-            DeleteVacuum(player);
+            if (VacuumCleaners.ContainsKey(player))
+                DeleteVacuum(player);
 
             SchematicObject schematicObject = ObjectSpawner.SpawnSchematic(_config.SchematicName, player.Position - _config.SchematicMove, new Vector3(0, player.Rotation.eulerAngles.y, 0));
 

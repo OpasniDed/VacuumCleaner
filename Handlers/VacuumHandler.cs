@@ -48,7 +48,7 @@ namespace VacuumCleaner.Handlers
                 PlayerVault[ev.Player] = items;
             }
 
-            if (items.Count >= 10)
+            if (items.Count >= _config.LimitForItems)
             {
                 ev.Player.ShowHint(Plugin.Instance.Translation.VaultLimit, 5f);
                 return;
